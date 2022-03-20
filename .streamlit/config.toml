@@ -17,6 +17,3 @@ textColor = '#FFFFFF'
 # Default: "sans serif"
 font = "sans serif"
 
-[server]
-port = 7701
-headless = true
