@@ -7,6 +7,7 @@ import pycountry
 import json
 import random
 
+st.set_page_config(page_title="Open Apparel Maps", page_icon=None, layout="wide")
 
 conn = create_engine("sqlite:///data/sustainability.sqlite")
 
@@ -169,7 +170,7 @@ def draw_top_locations_relative(df):
     return option,ddf,dfF
 
 
-st.sidebar.markdown('Source of data: <a href="https://openapparel.org/facilities">(Open Apparel)</a>',unsafe_allow_html=True)
+st.sidebar.markdown('Source of data: <a href="https://openapparel.org/facilities">Open Apparel</a>',unsafe_allow_html=True)
 
 dfCountries = pd.read_sql("t_reference_countries",con=conn)
 
@@ -183,42 +184,49 @@ contributor_id = ddf[ddf.contributor==contributor].contributor_id.values[0]
 
 df = get_country_distribution_by_contributor(contributor_id)
 
-st.title(f"Global Sourcing {contributor}")
+contributor_tc = contributor.title()
 
-st.markdown("## Source Countries")
+st.markdown(f"### Global Sourcing {contributor_tc}")
 
+
+st.markdown("#### Countries")
+st.write("Be aware these statistics show the number of supply chain relationships, not their monetary value.")
 map,options = draw_world_map_with_stats(df,dfCountries)
 st_echarts(options, map=map,height=400,width=600)
 
+left_text, right_text = st.columns([1,1])
+
+with left_text:
+    st.markdown("#### Country Distribution")
+    st.write("This shows the list-specific distribution of source countries. You can compare this to the global distribution in the side bar.")
+
+with right_text:
+    st.markdown("#### Relative Country Distrubution")
+    st.write("""This puts this list's country distribution in relation to the global, average distribution. Values of 1 indicate similar list-specific distribution as global, values 
+    greater than 1 indicate a preference for that country over an average.""")
+
+left_chart, right_chart = st.columns([1,1])
 
 options_specific = build_country_distribution_piechart(df)
 
-st.markdown("""## Country Distribution
+with left_chart:
+    a = st_echarts(options=options_specific,key="specific")
+    options_pie = build_country_distribution_piechart(get_country_distribution())
 
-This shows the list-specific distribution of source countries.
-""")
 
-a = st_echarts(options=options_specific,key="specific")
-
-options_pie = build_country_distribution_piechart(get_country_distribution())
 options_top = draw_top_locations()
 o,a,b = draw_top_locations_relative(df)
-st.markdown("""## Relative Country Distrubution
 
-This puts this list's country distribution in relation to the global, average distribution. Values of 1 indicate similar list-specific distribution as global, values 
-greater than 1 indicate a preference for that country over an average.
-
-""")
-st_echarts(options=o,key="rel_top")
+with right_chart:
+    st_echarts(options=o,key="rel_top")
 
 
 global_distribution = st.sidebar.empty()
 
 with global_distribution.container():
-    st.markdown("## Global Distribution")
+    st.markdown("#### Global Distribution")
     b = st_echarts(options=options_pie,key="global_pie")
 
-with st.sidebar.empty():
-    st.markdown("## Main Countries")
+    st.markdown("#### Main Countries (Global)")
     c = st_echarts(options=options_top,key="global_top2")
 
