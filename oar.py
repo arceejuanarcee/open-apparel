@@ -95,7 +95,10 @@ def draw_world_map_with_stats(df,dfCountries):
     alldata = []
     for i,row in df.iterrows():
         country = pycountry.countries.get(alpha_3=row.iso_a3)
-        alldata.append({"name":country.name,"value":int(row.num_facilities)})
+        if country.name == "Viet Nam": # Strange Quirk between pycountry and worldmap JSON
+            alldata.append({"name":country.common_name,"value":int(row.num_facilities)})
+        else:
+            alldata.append({"name":country.name,"value":int(row.num_facilities)})
 
     option["series"][0]["data"] = alldata
 
