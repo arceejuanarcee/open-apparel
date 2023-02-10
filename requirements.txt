@@ -1,4 +1,4 @@
 pycountry
-sqlalchemy
+sqlalchemy<2
 streamlit_echarts
 
