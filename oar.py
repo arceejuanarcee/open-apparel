@@ -187,6 +187,7 @@ st.sidebar.markdown('Source of data: <a href="https://openapparel.org/facilities
 
 #with engine.raw_connection() as conn:
 #    dfCountries = pd.read_sql("t_reference_countries",con=conn)
+
 dfCountries = pd.read_sql("t_reference_countries",con=conn)
 
 ddf = get_contributors()
