@@ -12,14 +12,14 @@ st.set_page_config(page_title="Open Apparel Maps", page_icon=None, layout="wide"
 engine = create_engine("sqlite:///data/sustainability.sqlite")
 
 def get_contributors():
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         df = pd.read_sql("SELECT contributor,contributor_id FROM t_oar_contributors WHERE contributor_id>0 ORDER BY contributor",con=conn)
     return df
 
 def get_country_distribution():
     sql_query = "select iso_a3,COUNT(*) as num_facilities from t_oar_facilities group by iso_a3 order by num_facilities DESC;"
 
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         df =  pd.read_sql(sql_query,con=conn)
     return df
 
@@ -58,12 +58,12 @@ def build_country_distribution_piechart(df):
 
 def get_country_distribution_by_contributor(contributor_id):
     sql_query = f"select substring(facility_id,1,2) as iso_a2,facility_id from t_oar_contributor_facility_xref where contributor_id={contributor_id};"
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         df = pd.read_sql(sql_query,con=conn)
 
     sql_query = "select iso_a3,COUNT(*) as num_facilities from t_oar_facilities where id IN ({}) group by iso_a3 order by num_facilities DESC;".format(
         ",".join([f"'{f_id}'" for f_id in df.facility_id.values]))
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         df = pd.read_sql(sql_query,con=conn)
     return df
 
@@ -114,7 +114,7 @@ def draw_world_map_with_stats(df,dfCountries):
 
 def draw_top_locations():
     sql_query = "select iso_a3,COUNT(*) as num_facilities from t_oar_facilities group by iso_a3 order by num_facilities DESC;"
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         dfF = pd.read_sql(sql_query,con=conn)
     dfF["ratio"] = dfF.num_facilities/dfF.num_facilities.sum()
     dfF["rel_ratio"] = dfF.ratio/dfF.ratio.max()
@@ -140,7 +140,7 @@ def draw_top_locations():
 
 def draw_top_locations_relative(df):
     sql_query = "select iso_a3,COUNT(*) as num_facilities from t_oar_facilities group by iso_a3 order by num_facilities DESC;"
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         dfF = pd.read_sql(sql_query,con=conn)
     dfF["ratio"] = dfF.num_facilities/dfF.num_facilities.sum()
     dfF["rel_ratio"] = dfF.ratio/dfF.ratio.max()
@@ -184,7 +184,7 @@ def draw_top_locations_relative(df):
 
 st.sidebar.markdown('Source of data: <a href="https://openapparel.org/facilities">Open Apparel</a>',unsafe_allow_html=True)
 
-with engine.connect() as conn:
+with engine.begin() as conn:
     dfCountries = pd.read_sql("t_reference_countries",con=conn)
 
 ddf = get_contributors()
