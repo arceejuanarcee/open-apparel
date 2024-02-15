@@ -184,8 +184,9 @@ def draw_top_locations_relative(df):
 
 st.sidebar.markdown('Source of data: <a href="https://openapparel.org/facilities">Open Apparel</a>',unsafe_allow_html=True)
 
-with engine.begin() as conn:
-    dfCountries = pd.read_sql("t_reference_countries",con=conn)
+#with engine.begin() as conn:
+#    dfCountries = pd.read_sql("t_reference_countries",con=conn)
+dfCountries = pd.read_sql("t_reference_countries",con=engine)
 
 ddf = get_contributors()
 if 'selection' not in st.session_state:
